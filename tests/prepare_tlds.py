@@ -17,24 +17,24 @@ http://wiki.mozilla.org/Gecko:Effective_TLD_Service
 """
 
 def getEffectiveTLDs(path):
-  file = codecs.open(path, "r", "UTF-8")
-  domains = set()
-  while True:
-    line = file.readline()
-    # line always contains a line terminator unless the file is empty
-    if len(line) == 0:
-      raise StopIteration
-    line = line.rstrip()
-    # comment, empty, or superfluous line for explicitness purposes
-    if line.startswith("//") or "." not in line:
-      continue
-    line = re.split(r"[ \t\n]", line, 1)[0]
-    entry = EffectiveTLDEntry(line)
-    domain = entry.domain()
-    assert domain not in domains, \
-           "repeating domain %s makes no sense" % domain
-    domains.add(domain)
-    yield entry
+  with codecs.open(path, "r", "UTF-8") as f:
+    domains = set()
+    while True:
+      line = f.readline()
+      # line always contains a line terminator unless the file is empty
+      if len(line) == 0:
+        raise StopIteration
+      line = line.rstrip()
+      # comment, empty, or superfluous line for explicitness purposes
+      if line.startswith("//") or "." not in line:
+        continue
+      line = re.split(r"[ \t\n]", line, 1)[0]
+      entry = EffectiveTLDEntry(line)
+      domain = entry.domain()
+      assert domain not in domains, \
+            "repeating domain %s makes no sense" % domain
+      domains.add(domain)
+      yield entry
 
 def _normalizeHostname(domain):
   """
@@ -49,7 +49,9 @@ def _normalizeHostname(domain):
   return ".".join(map(convertLabel, domain.split(".")))
 
 def _isASCII(s):
-  "True if s consists entirely of ASCII characters, false otherwise."
+  """
+  True if s consists entirely of ASCII characters, false otherwise.
+  """
   for c in s:
     if ord(c) > 127:
       return False
